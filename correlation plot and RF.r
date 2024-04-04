@@ -27,6 +27,23 @@ library(reshape2)
 library(corrplot)
 library(ggpubr)
 
+library(readxl)
+library(readxl)
+mydata <-read_excel('goodDF.xlsx')
+Oslo <- mydata[which(mydata$City %in% 1,]
+Oslo <- mydata[which(mydata$City %in% "1",]
+Oslo <- mydata[which(mydata$City %in% "1"),]
+write.csv(Oslo, "warmmonth.csv ")
+Bergen <- mydata[which(mydata$City %in% "2"),]
+write.csv(Bergen, "warmmonth.csv ")
+Trondheim <- mydata[which(mydata$City %in% "3"),]
+write.csv(Trondheim, "warmmonth.csv ")
+write.csv(Oslo, "Oslo.csv ")
+Bergen <- mydata[which(mydata$City %in% "2"),]
+write.csv(Bergen, "Bergen.csv ")
+Trondheim <- mydata[which(mydata$City %in% "3"),]
+write.csv(Trondheim, "Trondheim.csv ")
+                     
 NOx <- read_excel("NOx.xlsx")
 PM25 <- read_excel("PM2.5.xlsx")
 NOxOSLO <- read_excel("NOxOSLO.xlsx")
