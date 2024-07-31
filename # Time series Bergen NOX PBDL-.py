@@ -35,8 +35,15 @@ y = df["NOx"]
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Data splitting
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+# Calculate split index
+split_index = int(len(X_scaled) * 0.8)  # 80% for training
+# Split the data
+X_train = X_scaled[:split_index]
+X_test = X_scaled[split_index:]
+y_train = y[:split_index]
+y_test = y[split_index:]
+ 
 
 # Define ODE function
 def ode_function(TV, Tmean, HDD, VP, WS, WG, meanRH, SD, PP):
