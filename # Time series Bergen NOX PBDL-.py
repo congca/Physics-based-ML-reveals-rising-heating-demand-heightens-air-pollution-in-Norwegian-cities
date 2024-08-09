@@ -16,6 +16,10 @@ from scipy.stats import randint as sp_randint
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, BatchNormalization, Activation
 from tensorflow.keras.regularizers import l2
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.inspection import permutation_importance
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # Load data
 df = pd.read_excel("NOxBergenTS.xlsx")
@@ -36,13 +40,13 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 
-# Calculate split index
-split_index = int(len(X_scaled) * 0.8)  # 80% for training
-# Split the data
-X_train = X_scaled[:split_index]
-X_test = X_scaled[split_index:]
-y_train = y[:split_index]
-y_test = y[split_index:]
+# Split data into training, staging, validation, and test sets
+    X_train, X_staging, y_train, y_staging = train_test_split(X_ts, y_ts, test_size=0.4, random_state=42)
+    X_val, X_test, y_val, y_test = train_test_split(X_staging, y_staging, test_size=0.5, random_state=42)
+
+
+
+
  
 
 # Define ODE function
@@ -93,6 +97,43 @@ class CustomEstimator(BaseEstimator):
         self.history = self.model.fit(X, y, epochs=1000, batch_size=32, verbose=0)
         return self
 
+# Define a function to create datasets with varying time steps
+def create_time_series_dataset(X, y, time_steps, forecast_days):
+    Xs, ys = [], []
+    for i in range(len(X) - time_steps - forecast_days + 1):
+        Xs.append(X[i:i + time_steps].flatten())  # Flatten the time steps dimension
+        ys.append(y.iloc[i + time_steps:i + time_steps + forecast_days].values)
+    return np.array(Xs), np.array(ys)
+
+# Define hyperparameters for random search
+param_dist = {
+    'learning_rate': [0.0001, 0.0005, 0.001, 0.005, 0.01],
+    'num_units': sp_randint(50, 200),
+    'num_layers': sp_randint(1, 4),
+    'kernel_regularizer': [None, l2(0.01), l2(0.001)]
+}
+
+# Function to perform hyperparameter tuning and training
+def tune_and_train(time_steps, forecast_days):
+    X_ts, y_ts = create_time_series_dataset(pd.DataFrame(X_scaled), y, time_steps, forecast_days)    
+
+# Define a function to create datasets with varying time steps
+def create_time_series_dataset(X, y, time_steps, forecast_days):
+    X = X.to_numpy()  # Convert DataFrame to NumPy array
+    Xs, ys = [], []
+    for i in range(len(X) - time_steps - forecast_days + 1):
+        Xs.append(X[i:i + time_steps].flatten())  # Flatten the time steps dimension
+        ys.append(y.iloc[i + time_steps:i + time_steps + forecast_days].values)
+    return np.array(Xs), np.array(ys)
+
+# Loop to evaluate models with different time steps and forecast days
+for time_steps in [1, 7, 10]:  # Time steps
+    for forecast_days in [1, 7, 10]:  # Forecast for 1, 7, and 10 days
+        print(f"\nEvaluating models with Time Steps: {time_steps}, Forecast Days: {forecast_days}")
+        mae, rmse, feature_importance_df = tune_and_train(time_steps, forecast_days)
+        results[(time_steps, forecast_days)] = {'mae': mae, 'rmse': rmse, 'feature_importance': feature_importance_df}
+
+
 # Define hyperparameters for random search
 param_dist = {
     'learning_rate': [0.0001, 0.0005, 0.001, 0.005, 0.01],
@@ -119,8 +160,9 @@ print("Best Score: ", random_search_result.best_score_)
 # Access the best model from the RandomizedSearchCV
 best_model = random_search.best_estimator_.model
 
-# Train the model with best parameters
-history = best_model.fit(X_train, y_train, epochs=1000, batch_size=32, validation_data=(X_test, y_test), verbose=1)
+    # Train the model with best parameters
+    history = best_model.fit(X_train, y_train, epochs=1000, batch_size=32, validation_data=(X_val, y_val), verbose=1)
+ 
 
 
   
