@@ -26,24 +26,35 @@ library(tidyverse)
 library(reshape2)
 library(corrplot)
 library(ggpubr)
-
+library("readxl")
+library(ggplot2)
+library(descriptr)
+library(corrgram) 
+library(mice)
+library(reshape2) 
+library(openxlsx)
+library(e1071)
+library(rpart)
+library(rpart.plot)
+library(xlsx2dfs)
+library("corrplot")
 library(readxl)
-library(readxl)
-mydata <-read_excel('goodDF.xlsx')
-Oslo <- mydata[which(mydata$City %in% 1,]
-Oslo <- mydata[which(mydata$City %in% "1",]
-Oslo <- mydata[which(mydata$City %in% "1"),]
-write.csv(Oslo, "warmmonth.csv ")
-Bergen <- mydata[which(mydata$City %in% "2"),]
-write.csv(Bergen, "warmmonth.csv ")
-Trondheim <- mydata[which(mydata$City %in% "3"),]
-write.csv(Trondheim, "warmmonth.csv ")
-write.csv(Oslo, "Oslo.csv ")
-Bergen <- mydata[which(mydata$City %in% "2"),]
-write.csv(Bergen, "Bergen.csv ")
-Trondheim <- mydata[which(mydata$City %in% "3"),]
-write.csv(Trondheim, "Trondheim.csv ")
-                     
+library(party)
+library("randomForest")
+library(vivid) # for visualisations 
+library(randomForest) # for model fit
+library(ranger)       # for model fit
+library(vegan)
+library(rfUtilities)
+library(patchwork)
+library(rfPermute)
+library(export)
+library(tidyverse)
+library(reshape2)
+library(corrplot)
+library(broom.mixed)
+library(ggpubr)
+library(jtools)
 NOx <- read_excel("NOx.xlsx")
 PM25 <- read_excel("PM2.5.xlsx")
 NOxOSLO <- read_excel("NOxOSLO.xlsx")
@@ -53,6 +64,9 @@ PM25OSLO <- read_excel("PM25OSLO.xlsx")
 PM25Bergen <- read_excel("PM25Bergen.xlsx")
 PM25Trondheim <- read_excel("PM25Trondheim.xlsx")
 #### draw Radom forest graph
+library(randomForest)
+
+set.seed(42)  # 设置随机种子以确保结果可重复
 PM25.rf <- randomForest(PM25~.,data=PM25,mtyr=3,importance=T,proximity=F)
 # round(importance(PM25.rf),2)
 # varImpPlot(PM25.rf)
@@ -60,6 +74,23 @@ PM25.rf <- randomForest(PM25~.,data=PM25,mtyr=3,importance=T,proximity=F)
 NOx.rf <- randomForest(NOx~.,data=NOx,mtyr=3,importance=T,proximity=F)
 round(importance(NOx.rf),2)
 varImpPlot(NOx.rf)
+
+
+# 获取特征重要性
+importance_scoresPM25 <- importance(PM25.rf)
+importance_scoresNOX <- importance(NOx.rf)
+colnames(importance_scoresPM25)
+colnames(importance_scoresNOX)
+print(importance_scoresPM25)
+print(importance_scoresNOX)
+# 对特征重要性进行排序
+scoresPM25 <- importance_scoresPM25[order(-importance_scoresPM25[, "MeanDecreaseGini"]), ]
+scoresNOX <- importance_scoresNOX[order(-importance_scoresNOX[, "MeanDecreaseGini"]), ]
+
+# 打印排序后的特征重要性
+print(scoresPM25)
+print(scoresNOX)
+
 
 
 model <- PM25.rf

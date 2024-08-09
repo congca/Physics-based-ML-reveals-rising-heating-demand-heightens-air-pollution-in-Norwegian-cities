@@ -13,7 +13,16 @@ viviRf  <- vivi(fit = model,
                 predictFun = NULL,
                 numPerm = 4,
                 showVimpError = FALSE)
-viviHeatmap(mat = viviRf)
+
+# 如果需要添加图例
+# 可能需要使用额外的函数来添加图例，这取决于热图函数的具体实现
+# Save K-means clustering result with 4 centers
+png('Importance of variables as determined by the random forest-PM25_OSLO.png', height = 15, width = 25, units = 'cm', res = 300)
+plot.new()
+viviHeatmap(mat = viviRf) 
+dev.off()
+
+
 library("network")
 library("sna")
 library("intergraph")
@@ -39,8 +48,12 @@ viviRf  <- vivi(fit = model,
                 predictFun = NULL,
                 numPerm = 4,
                 showVimpError = FALSE)
-viviHeatmap(mat = viviRf)
-library("network")
+
+png('Importance of variables as determined by the random forest-PM25_Bergen.png', height = 15, width = 25, units = 'cm', res = 300)
+plot.new()
+viviHeatmap(mat = viviRf) 
+dev.off()
+ library("network")
 library("sna")
 library("intergraph")
 viviNetwork(mat = viviRf)
@@ -67,8 +80,12 @@ viviRf  <- vivi(fit = model,
                 predictFun = NULL,
                 numPerm = 4,
                 showVimpError = FALSE)
-viviHeatmap(mat = viviRf)
-library("network")
+
+png('Importance of variables as determined by the random forest-PM25_Trondheim.png', height = 15, width = 25, units = 'cm', res = 300)
+plot.new()
+viviHeatmap(mat = viviRf) 
+dev.off()
+ library("network")
 library("sna")
 library("intergraph")
 viviNetwork(mat = viviRf)
@@ -94,6 +111,13 @@ viviRf  <- vivi(fit = model,
                 numPerm = 4,
                 showVimpError = FALSE)
 viviHeatmap(mat = viviRf)
+
+
+png('Importance of variables as determined by the random forest-NOx.png', height = 15, width = 25, units = 'cm', res = 300)
+plot.new()
+viviHeatmap(mat = viviRf) 
+dev.off()
+
 library("network")
 library("sna")
 library("intergraph")
@@ -118,6 +142,11 @@ viviRf  <- vivi(fit = model,
                 numPerm = 4,
                 showVimpError = FALSE)
 viviHeatmap(mat = viviRf)
+
+png('Importance of variables as determined by the random forest-NOx_OSLO.png', height = 15, width = 25, units = 'cm', res = 300)
+plot.new()
+viviHeatmap(mat = viviRf) 
+dev.off()
 library("network")
 library("sna")
 library("intergraph")
@@ -141,7 +170,10 @@ viviRf  <- vivi(fit = model,
                 predictFun = NULL,
                 numPerm = 4,
                 showVimpError = FALSE)
-viviHeatmap(mat = viviRf)
+png('Importance of variables as determined by the random forest-NOx_Trondheim.png', height = 15, width = 25, units = 'cm', res = 300)
+plot.new()
+viviHeatmap(mat = viviRf) 
+dev.off()
 library("network")
 library("sna")
 library("intergraph")
@@ -165,7 +197,10 @@ viviRf  <- vivi(fit = model,
                 predictFun = NULL,
                 numPerm = 4,
                 showVimpError = FALSE)
-viviHeatmap(mat = viviRf)
+png('Importance of variables as determined by the random forest-NOx_Bergen.png', height = 15, width = 25, units = 'cm', res = 300)
+plot.new()
+viviHeatmap(mat = viviRf) 
+dev.off()
 library("network")
 library("sna")
 library("intergraph")
