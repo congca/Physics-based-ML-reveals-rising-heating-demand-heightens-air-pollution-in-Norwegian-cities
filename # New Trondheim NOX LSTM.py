@@ -23,10 +23,16 @@ from scipy import stats
 # Load data
 df = pd.read_excel("NOxTrondheim.xlsx")  
 
-# Extract features and target variable
-X = df[["TV", "Tmean", "HDD", "VP", "WS", "WG", "meanRH", "SD", "PP"]]
-Y = df["NOx"]
+# Temporal feature processing
+df['Time'] = pd.to_datetime(df['Time'], format='%d.%m.%Y')
+df['Year'] = df['Time'].dt.year
+df['Month'] = df['Time'].dt.month
+df['Day'] = df['Time'].dt.day
+df = df.sort_values(by='Time')
 
+# Extract features and target variable
+X = df[["TV", "Tmean", "HDD", "VP", "WS", "WG", "meanRH", "SD", "PP", "Year", "Month","Day"]]
+y = df["NOx"]
 # Standardize features
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
