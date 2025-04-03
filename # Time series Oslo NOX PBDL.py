@@ -86,14 +86,15 @@ X_scaled = scaler.fit_transform(X)
     X_train, X_staging, y_train, y_staging = train_test_split(X_ts, y_ts, test_size=0.4, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_staging, y_staging, test_size=0.5, random_state=42)
 
- 
-# 定义ODE函数（以y'' + y = 0为例）
+
+# Define the ODE function (using y'' + y = 0 )
 def ode_function(y_pred):
-    # 假设y_pred是模型的预测输出，应用简单的ODE约束y'' + y = 0
-    # 这里我们简单地计算y_pred的二阶导数（近似）并返回ODE约束
-    y_pred_diff2 = tf.gradients(y_pred, [time_steps])[0]  # 计算二阶导数
-    ode_constraint = y_pred_diff2 + y_pred  # ODE约束：y'' + y = 0
+    # Assume y_pred is the model's predicted output and apply a simple ODE constraint y'' + y = 0
+    # Here, we approximately compute the second derivative of y_pred and return the ODE constraint
+    y_pred_diff2 = tf.gradients(y_pred, [time_steps])[0]  # Compute the second derivative
+    ode_constraint = y_pred_diff2 + y_pred  # ODE constraint: y'' + y = 0
     return ode_constraint
+
 
 
 # Custom layer to incorporate ODE function
@@ -114,12 +115,35 @@ def ode_system(y_true, y_pred):
     loss = tf.reduce_mean(tf.square(y_true - y_pred))  # Example: Mean Squared Error
     return loss
 
-# 定义带有ODE约束的损失函数
-def ode_system(y_true, y_pred, ode_loss_weight=0.1):
+import tensorflow as tf
+
+# Define the loss function with an ODE constraint
+def custom_loss(y_true, y_pred, ode_loss_weight=0.1):
+    """
+    Custom loss function combining mean squared error (MSE) with an ODE constraint.
+    Args:
+        y_true: True target values.
+        y_pred: Predicted values from the model.
+        ode_loss_weight: Weighting factor for the ODE constraint loss.
+    Returns:
+        A combined loss value.
+    """
+    # Compute the standard data loss (Mean Squared Error)
     data_loss = tf.reduce_mean(tf.square(y_true - y_pred))
-    ode_loss = tf.reduce_mean(tf.square(ode_function(y_pred))) 
-    # 数据损失和ODE损失的加权和
+    # Compute the ODE constraint loss (assuming y'' + y = 0)
+    with tf.GradientTape() as tape1:
+        tape1.watch(y_pred)
+        first_derivative = tape1.gradient(y_pred, time_steps)  # Compute the first derivative
+
+    with tf.GradientTape() as tape2:
+        tape2.watch(first_derivative)
+        second_derivative = tape2.gradient(first_derivative, time_steps)  # Compute the second derivative
+
+    ode_loss = tf.reduce_mean(tf.square(second_derivative + y_pred))  # Enforce y'' + y = 0
+
+    # Combine data loss and ODE loss
     total_loss = data_loss + ode_loss_weight * ode_loss
+
     return total_loss
     
 # Define custom estimator class
