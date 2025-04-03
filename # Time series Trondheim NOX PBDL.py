@@ -142,6 +142,7 @@ def custom_loss(y_true, y_pred, ode_loss_weight=0.1):
     total_loss = data_loss + ode_loss_weight * ode_loss
 
     return total_loss
+    loss = total_loss
 # Define custom estimator class
 class CustomEstimator(BaseEstimator):
     def __init__(self, learning_rate, num_units, num_layers, kernel_regularizer=None):
