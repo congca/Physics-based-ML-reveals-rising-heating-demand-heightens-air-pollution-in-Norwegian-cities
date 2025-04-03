@@ -86,9 +86,15 @@ X_scaled = scaler.fit_transform(X)
     X_train, X_staging, y_train, y_staging = train_test_split(X_ts, y_ts, test_size=0.4, random_state=42)
     X_val, X_test, y_val, y_test = train_test_split(X_staging, y_staging, test_size=0.5, random_state=42)
 
-# Define ODE function
-def ode_function(TV, Tmean, HDD, VP, WS, WG, meanRH, SD, PP):
-    pass
+ 
+# 定义ODE函数（以y'' + y = 0为例）
+def ode_function(y_pred):
+    # 假设y_pred是模型的预测输出，应用简单的ODE约束y'' + y = 0
+    # 这里我们简单地计算y_pred的二阶导数（近似）并返回ODE约束
+    y_pred_diff2 = tf.gradients(y_pred, [time_steps])[0]  # 计算二阶导数
+    ode_constraint = y_pred_diff2 + y_pred  # ODE约束：y'' + y = 0
+    return ode_constraint
+
 
 # Custom layer to incorporate ODE function
 class ODELayer(tf.keras.layers.Layer):
@@ -97,18 +103,25 @@ class ODELayer(tf.keras.layers.Layer):
         self.ode_function = ode_function
 
     def call(self, inputs):
-        # Apply the ODE function
+        # Apply the ODE function,
         return self.ode_function(*inputs)
 
     def compute_output_shape(self, input_shape):
         return input_shape[:-1]  # Output shape same as input shape except the last dimension  
 
-# Define physical-based loss function with L2 regularization
+# Define a physical-based loss function with L2 regularization
 def ode_system(y_true, y_pred):
-    # Your implementation of ode_system with L2 regularization
     loss = tf.reduce_mean(tf.square(y_true - y_pred))  # Example: Mean Squared Error
     return loss
 
+# 定义带有ODE约束的损失函数
+def ode_system(y_true, y_pred, ode_loss_weight=0.1):
+    data_loss = tf.reduce_mean(tf.square(y_true - y_pred))
+    ode_loss = tf.reduce_mean(tf.square(ode_function(y_pred))) 
+    # 数据损失和ODE损失的加权和
+    total_loss = data_loss + ode_loss_weight * ode_loss
+    return total_loss
+    
 # Define custom estimator class
 class CustomEstimator(BaseEstimator):
     def __init__(self, learning_rate, num_units, num_layers, kernel_regularizer=None):
